@@ -13,6 +13,15 @@ const I18N = {
     secSummary:"الملخص المهني", secExp:"الخبرات العملية", secEdu:"التعليم", secProj:"المشاريع",
     secVol:"العمل التطوعي", secSkills:"المهارات", secLang:"اللغات", secCerts:"الشهادات",
     customSections:"أقسام إضافية",
+    matchTitle:"مطابقة مع وظيفة معيّنة",
+    matchHint:"الصق نص إعلان الوظيفة، وشوف نسبة تطابق سيرتك معها وأهم الكلمات الناقصة",
+    matchPlaceholder:"الصق هنا وصف الوظيفة...",
+    matchBtn:"تحليل التطابق",
+    matchScoreLabel:"نسبة التطابق",
+    matchMissingLabel:"كلمات موجودة في الوظيفة وغير موجودة في سيرتك — أضفها لو تنطبق عليك فعلاً:",
+    matchNoText:"الصق نص الوظيفة أولاً",
+    matchNoKeywords:"لم أستطع استخراج كلمات كافية من النص، حاول تلصق نصًا أطول",
+    matchAllGood:"✓ ما شاء الله — كل الكلمات المهمة موجودة في سيرتك",
     pwTitle:"انتهت محاولاتك المجانية", pwSub:"اشترك للتحميل بلا حدود وبدون علامة مائية",
     pwBest:"الأفضل", pwPro:"بريميوم", pwMonth:"ر.س/شهر", pwProFeat:"كل القوالب • بدون علامة مائية • تحليل ATS متقدم",
     pwLife:"مدى الحياة", pwOnce:"ر.س مرة واحدة", pwLifeFeat:"كل المزايا للأبد — دفعة واحدة",
@@ -48,6 +57,15 @@ const I18N = {
     secSummary:"Professional Summary", secExp:"Work Experience", secEdu:"Education", secProj:"Projects",
     secVol:"Volunteering", secSkills:"Skills", secLang:"Languages", secCerts:"Certifications",
     customSections:"Additional Sections",
+    matchTitle:"Match a Job Posting",
+    matchHint:"Paste the job ad text to see your match score and the most important missing keywords",
+    matchPlaceholder:"Paste the job description here...",
+    matchBtn:"Analyze Match",
+    matchScoreLabel:"Match Score",
+    matchMissingLabel:"Words in the job ad missing from your resume — add them if they genuinely apply to you:",
+    matchNoText:"Paste the job text first",
+    matchNoKeywords:"Couldn't extract enough keywords — try pasting more text",
+    matchAllGood:"✓ Great — all important keywords are already in your resume",
     pwTitle:"Free downloads used up", pwSub:"Subscribe for unlimited, watermark-free downloads",
     pwBest:"Best", pwPro:"Premium", pwMonth:"/mo", pwProFeat:"All templates • No watermark • Advanced ATS",
     pwLife:"Lifetime", pwOnce:"one-time", pwLifeFeat:"All features forever — one payment",
@@ -178,7 +196,70 @@ async function regenerateEnglish(){
   showTranslateOverlay(false);
 }
 
-// ===== Repeatable sections =====
+// ===== Job Match (free, keyword-based — no API cost) =====
+const STOPWORDS_AR = new Set(["في","من","على","إلى","الى","عن","مع","أن","ان","إن","هذا","هذه","ذلك","التي","الذي","كل","أو","او","ثم","قد","لا","نعم","ما","لم","لن","كان","يكون","هو","هي","نحن","أنت","انت","أنتم","انتم","هم","لها","له","به","بها","كما","حتى","عند","بين","تحت","فوق","أيضا","أيضاً","ايضا","ضمن","نحو","لدى","غير","بعض","جميع","كافة","سوف","الذين","التى"]);
+const STOPWORDS_EN = new Set(["the","a","an","and","or","of","to","in","on","for","with","is","are","be","this","that","you","we","will","our","your","as","at","by","from","it","its","they","their","have","has","had","not","but","if","into","about","than","then","so","such","can","may","also","etc","using","use","per","all","any","we're","you'll"]);
+function normalizeArabicWord(w){
+  return w
+    .replace(/[\u064B-\u0652\u0640]/g,"")
+    .replace(/[إأآ]/g,"ا")
+    .replace(/ى/g,"ي")
+    .replace(/ة$/,"ه");
+}
+function extractKeywords(text){
+  const counts = new Map();
+  (text||"")
+    .toLowerCase()
+    .replace(/[^\u0600-\u06FFa-z0-9+#.\s]/g," ")
+    .split(/\s+/)
+    .map(w=>w.trim())
+    .filter(Boolean)
+    .forEach(raw=>{
+      let word = /[\u0600-\u06FF]/.test(raw) ? normalizeArabicWord(raw) : raw;
+      if(word.length < 2) return;
+      if(STOPWORDS_AR.has(word) || STOPWORDS_EN.has(word)) return;
+      if(/^\d+$/.test(word)) return;
+      counts.set(word,(counts.get(word)||0)+1);
+    });
+  return counts;
+}
+function getCvFullText(){
+  const parts = [state.title, state.summary, state.skills, state.languages, state.certs];
+  state.experience.forEach(e=>parts.push(e.role,e.org,e.desc));
+  state.education.forEach(e=>parts.push(e.degree,e.org,e.desc));
+  state.projects.forEach(e=>parts.push(e.name,e.desc));
+  state.volunteer.forEach(e=>parts.push(e.role,e.org,e.desc));
+  state.custom.forEach(e=>parts.push(e.title,e.details));
+  return parts.filter(Boolean).join("\n");
+}
+function runJobMatch(){
+  const dict = I18N[LANG];
+  const jobText = $("#jobText").value.trim();
+  if(!jobText){ alert(dict.matchNoText); return; }
+  const jobKeywords = extractKeywords(jobText);
+  if(jobKeywords.size === 0){ alert(dict.matchNoKeywords); return; }
+  const cvKeywords = extractKeywords(getCvFullText());
+
+  let matchedCount = 0;
+  const missing = [];
+  [...jobKeywords.entries()].sort((a,b)=>b[1]-a[1]).forEach(([word])=>{
+    if(cvKeywords.has(word)) matchedCount++;
+    else missing.push(word);
+  });
+  const score = Math.round((matchedCount / jobKeywords.size) * 100);
+
+  $("#matchResult").classList.remove("hidden");
+  $("#matchScore").textContent = score+"%";
+  const color = score>=70?"#059669":score>=40?"#d97706":"#dc2626";
+  $("#matchScore").style.color = color;
+  $("#matchBar").style.width = score+"%";
+  $("#matchBar").style.background = color;
+  $("#matchMissing").innerHTML = missing.length
+    ? missing.slice(0,18).map(w=>`<span class="text-xs bg-amber-50 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-2 py-1 rounded-md">${esc(w)}</span>`).join("")
+    : `<span class="text-xs text-emerald-600 font-semibold">${dict.matchAllGood}</span>`;
+}
+
+
 const repeatOrder = ["experience","education","projects","volunteer","custom"];
 const repeatSchema = {
   experience:[{k:"role"},{k:"org"},{k:"date"},{k:"desc",area:true}],
@@ -387,6 +468,7 @@ document.addEventListener("click",(e)=>{
   }
 });
 $("#templateSelect").addEventListener("change",(e)=>{ $("#cv").dataset.template=e.target.value; });
+$("#matchBtn").addEventListener("click", runJobMatch);
 
 $("#langToggle").addEventListener("click", async ()=>{
   if(LANG === "ar"){

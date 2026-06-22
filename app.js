@@ -25,6 +25,7 @@ const I18N = {
     authClose:"إغلاق", savedCloud:"✓ محفوظ في حسابك", savingCloud:"…جارٍ الحفظ",
     guestNote:"تعمل كزائر — سجّل الدخول لحفظ بياناتك",
     checkEmail:"تم الإرسال — راجع بريدك لتأكيد الحساب ثم سجّل الدخول",
+    authFillBoth:"يرجى كتابة البريد الإلكتروني وكلمة المرور (٦ أحرف على الأقل)",
     fields:{
       experience:{role:"المسمى الوظيفي",org:"الجهة / الشركة",date:"المدة",desc:"الوصف (سطر لكل إنجاز)"},
       education:{degree:"الدرجة / التخصص",org:"المؤسسة التعليمية",date:"المدة",desc:"تفاصيل (اختياري)"},
@@ -57,6 +58,7 @@ const I18N = {
     authClose:"Close", savedCloud:"✓ Saved to your account", savingCloud:"…Saving",
     guestNote:"Working as guest — sign in to save your data",
     checkEmail:"Sent — check your email to confirm, then sign in",
+    authFillBoth:"Please enter your email and password (6+ characters)",
     fields:{
       experience:{role:"Job Title",org:"Company",date:"Duration",desc:"Description (one line per achievement)"},
       education:{degree:"Degree / Major",org:"Institution",date:"Duration",desc:"Details (optional)"},
@@ -339,6 +341,11 @@ function applyLang(){
     const k = el.dataset.i18n;
     const v = I18N[LANG][k];
     if(typeof v === "string") el.textContent = v;
+  });
+  document.querySelectorAll("[data-i18n-ph]").forEach(el=>{
+    const k = el.dataset.i18nPh;
+    const v = I18N[LANG][k];
+    if(typeof v === "string") el.placeholder = v;
   });
 }
 

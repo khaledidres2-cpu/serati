@@ -1,0 +1,422 @@
+// ===== i18n dictionary (UI labels only — not CV content) =====
+const I18N = {
+  ar: {
+    tagline:"سيرتك الذاتية… بمعايير عالمية", download:"تحميل PDF",
+    tplClassic:"قالب كلاسيكي", tplModern:"قالب عصري", tplMinimal:"قالب بسيط",
+    atsTitle:"تحليل توافق ATS", personalInfo:"المعلومات الشخصية",
+    fullName:"الاسم الكامل", jobTitle:"المسمى الوظيفي", email:"البريد الإلكتروني",
+    phone:"رقم الهاتف", location:"المدينة / الدولة", link:"رابط (LinkedIn / موقع)",
+    summary:"نبذة مختصرة (الملخص المهني)", experience:"الخبرات العملية", education:"التعليم",
+    projects:"المشاريع", volunteer:"العمل التطوعي", skills:"المهارات", languages:"اللغات", certs:"الشهادات",
+    skillsHint:"افصل بين المهارات بفاصلة", langHint:"افصل بين اللغات بفاصلة", certsHint:"شهادة في كل سطر",
+    add:"+ إضافة", remove:"حذف ✕", previewNote:"معاينة حيّة — هذا ما سيظهر في ملف PDF",
+    secSummary:"الملخص المهني", secExp:"الخبرات العملية", secEdu:"التعليم", secProj:"المشاريع",
+    secVol:"العمل التطوعي", secSkills:"المهارات", secLang:"اللغات", secCerts:"الشهادات",
+    pwTitle:"انتهت محاولاتك المجانية", pwSub:"اشترك للتحميل بلا حدود وبدون علامة مائية",
+    pwBest:"الأفضل", pwPro:"بريميوم", pwMonth:"ر.س/شهر", pwProFeat:"كل القوالب • بدون علامة مائية • تحليل ATS متقدم",
+    pwLife:"مدى الحياة", pwOnce:"ر.س مرة واحدة", pwLifeFeat:"كل المزايا للأبد — دفعة واحدة",
+    pwUpgrade:"ترقية الآن (تجريبي)", pwClose:"ربما لاحقاً",
+    freeLeft:(n)=>`محاولات مجانية متبقية: ${n}`, proActive:"✓ حساب بريميوم مُفعّل",
+    // auth
+    account:"حسابي", signIn:"تسجيل الدخول", signUp:"إنشاء حساب", signOut:"تسجيل الخروج",
+    authTitle:"الدخول إلى سيرتي", authSub:"سجّل الدخول لحفظ سيرتك على كل أجهزتك",
+    pwPlaceholder:"كلمة المرور", emailPlaceholder:"البريد الإلكتروني",
+    haveAccount:"عندك حساب؟ سجّل الدخول", noAccount:"ما عندك حساب؟ أنشئ واحد",
+    authClose:"إغلاق", savedCloud:"✓ محفوظ في حسابك", savingCloud:"…جارٍ الحفظ",
+    guestNote:"تعمل كزائر — سجّل الدخول لحفظ بياناتك",
+    checkEmail:"تم الإرسال — راجع بريدك لتأكيد الحساب ثم سجّل الدخول",
+    fields:{
+      experience:{role:"المسمى الوظيفي",org:"الجهة / الشركة",date:"المدة",desc:"الوصف (سطر لكل إنجاز)"},
+      education:{degree:"الدرجة / التخصص",org:"المؤسسة التعليمية",date:"المدة",desc:"تفاصيل (اختياري)"},
+      projects:{name:"اسم المشروع",link:"رابط (اختياري)",desc:"الوصف"},
+      volunteer:{role:"الدور",org:"الجهة",date:"المدة",desc:"الوصف"}
+    }
+  },
+  en: {
+    tagline:"Your resume, to global standards", download:"Download PDF",
+    tplClassic:"Classic template", tplModern:"Modern template", tplMinimal:"Minimal template",
+    atsTitle:"ATS Compatibility", personalInfo:"Personal Information",
+    fullName:"Full Name", jobTitle:"Job Title", email:"Email",
+    phone:"Phone", location:"City / Country", link:"Link (LinkedIn / website)",
+    summary:"Professional Summary", experience:"Work Experience", education:"Education",
+    projects:"Projects", volunteer:"Volunteering", skills:"Skills", languages:"Languages", certs:"Certifications",
+    skillsHint:"Separate skills with commas", langHint:"Separate languages with commas", certsHint:"One certificate per line",
+    add:"+ Add", remove:"Remove ✕", previewNote:"Live preview — this is your PDF",
+    secSummary:"Professional Summary", secExp:"Work Experience", secEdu:"Education", secProj:"Projects",
+    secVol:"Volunteering", secSkills:"Skills", secLang:"Languages", secCerts:"Certifications",
+    pwTitle:"Free downloads used up", pwSub:"Subscribe for unlimited, watermark-free downloads",
+    pwBest:"Best", pwPro:"Premium", pwMonth:"/mo", pwProFeat:"All templates • No watermark • Advanced ATS",
+    pwLife:"Lifetime", pwOnce:"one-time", pwLifeFeat:"All features forever — one payment",
+    pwUpgrade:"Upgrade now (demo)", pwClose:"Maybe later",
+    freeLeft:(n)=>`Free downloads left: ${n}`, proActive:"✓ Premium account active",
+    // auth
+    account:"Account", signIn:"Sign in", signUp:"Sign up", signOut:"Sign out",
+    authTitle:"Sign in to Seerati", authSub:"Sign in to save your resume across all devices",
+    pwPlaceholder:"Password", emailPlaceholder:"Email",
+    haveAccount:"Have an account? Sign in", noAccount:"No account? Create one",
+    authClose:"Close", savedCloud:"✓ Saved to your account", savingCloud:"…Saving",
+    guestNote:"Working as guest — sign in to save your data",
+    checkEmail:"Sent — check your email to confirm, then sign in",
+    fields:{
+      experience:{role:"Job Title",org:"Company",date:"Duration",desc:"Description (one line per achievement)"},
+      education:{degree:"Degree / Major",org:"Institution",date:"Duration",desc:"Details (optional)"},
+      projects:{name:"Project Name",link:"Link (optional)",desc:"Description"},
+      volunteer:{role:"Role",org:"Organization",date:"Duration",desc:"Description"}
+    }
+  }
+};
+let LANG = "ar";
+const t = (k) => I18N[LANG][k];
+
+// ===== State =====
+const DEFAULT_STATE = {
+  fullName:"خالد إدريس", title:"مهندس برمجيات", email:"khaled@email.com",
+  phone:"+971 50 000 0000", location:"دبي، الإمارات", link:"linkedin.com/in/khaled",
+  summary:"مهندس برمجيات بخبرة 5 سنوات في تطوير تطبيقات الويب وقيادة الفرق التقنية. شغوف بكتابة كود نظيف وحل المشكلات المعقّدة.",
+  skills:"JavaScript، Python، React، Node.js، إدارة المشاريع، تحليل البيانات",
+  languages:"العربية (لغة أم)، الإنجليزية (متقدم)",
+  certs:"AWS Certified Developer - أمازون - 2023",
+  experience:[{role:"مهندس برمجيات أول",org:"شركة التقنية",date:"2021 - الآن",desc:"قيادة فريق من 4 مطورين.\nتحسين أداء النظام بنسبة 40%.\nتطوير واجهات برمجية (APIs) جديدة."}],
+  education:[{degree:"بكالوريوس علوم الحاسب",org:"جامعة الإمارات",date:"2015 - 2019",desc:""}],
+  projects:[], volunteer:[]
+};
+const appData = {
+  ar: JSON.parse(JSON.stringify(DEFAULT_STATE)),
+  en: null
+};
+let enDirty = true;
+let state = appData.ar;
+
+// Billing state
+let downloads = 0, isPro = false;
+const FREE_LIMIT = 3;
+
+// ===== Helpers =====
+const $ = (s, r=document) => r.querySelector(s);
+const esc = (s) => (s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+const splitList = (s) => (s||"").split(/[،,\n]+/).map(x=>x.trim()).filter(Boolean);
+
+// ===== Auto-translation (Arabic → English) =====
+async function translateText(text){
+  const clean = (text||"").trim();
+  if(!clean) return "";
+  if(/^https?:\/\//i.test(clean) || /@/.test(clean) || /^[+0-9 ()-]+$/.test(clean)) return clean;
+  try{
+    const res = await fetch(`https://api.mymemory.translated.net/get?q=${encodeURIComponent(clean)}&langpair=ar|en`);
+    const data = await res.json();
+    const out = data && data.responseData && data.responseData.translatedText;
+    return out ? out : clean;
+  }catch(err){
+    return clean;
+  }
+}
+async function translateLines(text){
+  const lines = (text||"").split(/\n+/).map(l=>l.trim()).filter(Boolean);
+  if(!lines.length) return "";
+  const out = await Promise.all(lines.map(translateText));
+  return out.join("\n");
+}
+async function translateListText(text){
+  const items = splitList(text);
+  if(!items.length) return "";
+  const out = await Promise.all(items.map(translateText));
+  return out.join(", ");
+}
+async function buildTranslatedState(ar){
+  const en = {
+    fullName: await translateText(ar.fullName),
+    title:    await translateText(ar.title),
+    email:    ar.email,
+    phone:    ar.phone,
+    location: await translateText(ar.location),
+    link:     ar.link,
+    summary:  await translateLines(ar.summary),
+    skills:   await translateListText(ar.skills),
+    languages:await translateListText(ar.languages),
+    certs:    await translateLines(ar.certs),
+  };
+  en.experience = await Promise.all(ar.experience.map(async item => ({
+    role: await translateText(item.role), org: await translateText(item.org),
+    date: await translateText(item.date), desc: await translateLines(item.desc)
+  })));
+  en.education = await Promise.all(ar.education.map(async item => ({
+    degree: await translateText(item.degree), org: await translateText(item.org),
+    date: await translateText(item.date), desc: await translateLines(item.desc)
+  })));
+  en.projects = await Promise.all(ar.projects.map(async item => ({
+    name: await translateText(item.name), link: item.link,
+    desc: await translateLines(item.desc)
+  })));
+  en.volunteer = await Promise.all(ar.volunteer.map(async item => ({
+    role: await translateText(item.role), org: await translateText(item.org),
+    date: await translateText(item.date), desc: await translateLines(item.desc)
+  })));
+  return en;
+}
+function showTranslateOverlay(show){
+  const el = $("#translateOverlay");
+  if(el) el.classList.toggle("hidden", !show);
+}
+async function regenerateEnglish(){
+  showTranslateOverlay(true);
+  try{
+    appData.en = await buildTranslatedState(appData.ar);
+    enDirty = false;
+  }catch(err){
+    console.error("Translation failed:", err);
+    if(!appData.en) appData.en = JSON.parse(JSON.stringify(appData.ar));
+  }
+  showTranslateOverlay(false);
+}
+
+// ===== Repeatable sections =====
+const repeatOrder = ["experience","education","projects","volunteer"];
+const repeatSchema = {
+  experience:[{k:"role"},{k:"org"},{k:"date"},{k:"desc",area:true}],
+  education:[{k:"degree"},{k:"org"},{k:"date"},{k:"desc",area:true}],
+  projects:[{k:"name"},{k:"link"},{k:"desc",area:true}],
+  volunteer:[{k:"role"},{k:"org"},{k:"date"},{k:"desc",area:true}]
+};
+
+function renderRepeat(section){
+  const list = $("#"+section+"List");
+  list.innerHTML = "";
+  const labels = I18N[LANG].fields[section];
+  state[section].forEach((item, i) => {
+    const card = document.createElement("div");
+    card.className = "repeat-item space-y-2";
+    const fieldsHtml = repeatSchema[section].map(f => {
+      const val = esc(item[f.k]||"");
+      const lbl = labels[f.k];
+      const input = f.area
+        ? `<textarea rows="3" data-rep="${section}" data-idx="${i}" data-key="${f.k}" class="field">${val}</textarea>`
+        : `<input data-rep="${section}" data-idx="${i}" data-key="${f.k}" class="field" value="${val}">`;
+      return `<label class="block"><span class="text-xs text-gray-500">${lbl}</span>${input}</label>`;
+    }).join("");
+    card.innerHTML = `<div class="flex justify-between items-center">
+        <span class="text-xs font-semibold text-gray-400">#${i+1}</span>
+        <button class="remove-btn" data-remove="${section}" data-idx="${i}">${t("remove")}</button>
+      </div>${fieldsHtml}`;
+    list.appendChild(card);
+  });
+}
+function renderAllRepeats(){ repeatOrder.forEach(renderRepeat); }
+
+// ===== CV Render =====
+function entryBlock(rows){ return rows.map(e=>`
+    <div class="cv-entry">
+      <div class="row1"><span>${esc(e.t1)}</span>${e.date?`<span class="date">${esc(e.date)}</span>`:""}</div>
+      ${e.sub?`<div class="sub">${esc(e.sub)}</div>`:""}
+      ${e.desc?`<div class="desc">${esc(e.desc)}</div>`:""}
+    </div>`).join(""); }
+
+function renderCV(){
+  const cv = $("#cv");
+  const skills = splitList(state.skills);
+  const langs = splitList(state.languages);
+  const certs = (state.certs||"").split(/\n+/).map(x=>x.trim()).filter(Boolean);
+  const contact = [state.email, state.phone, state.location, state.link].filter(Boolean).map(esc).join(" • ");
+
+  const exp = state.experience.filter(e=>e.role||e.org).map(e=>({t1:e.role,date:e.date,sub:e.org,desc:e.desc}));
+  const edu = state.education.filter(e=>e.degree||e.org).map(e=>({t1:e.degree,date:e.date,sub:e.org,desc:e.desc}));
+  const proj= state.projects.filter(e=>e.name).map(e=>({t1:e.name,date:"",sub:e.link,desc:e.desc}));
+  const vol = state.volunteer.filter(e=>e.role||e.org).map(e=>({t1:e.role,date:e.date,sub:e.org,desc:e.desc}));
+
+  const wm = (!isPro && downloads >= FREE_LIMIT)
+    ? `<div class="watermark">سيرتي | SEERATI</div>` : "";
+
+  cv.innerHTML = `
+    ${wm}
+    <div class="cv-header">
+      <h1>${esc(state.fullName)||t("fullName")}</h1>
+      ${state.title?`<div class="cv-title">${esc(state.title)}</div>`:""}
+      <div class="cv-contact">${contact||'<span class="muted">'+t("email")+'</span>'}</div>
+    </div>
+    ${state.summary?`<div class="cv-section"><h2>${t("secSummary")}</h2><div class="desc">${esc(state.summary)}</div></div>`:""}
+    ${exp.length?`<div class="cv-section"><h2>${t("secExp")}</h2>${entryBlock(exp)}</div>`:""}
+    ${edu.length?`<div class="cv-section"><h2>${t("secEdu")}</h2>${entryBlock(edu)}</div>`:""}
+    ${proj.length?`<div class="cv-section"><h2>${t("secProj")}</h2>${entryBlock(proj)}</div>`:""}
+    ${vol.length?`<div class="cv-section"><h2>${t("secVol")}</h2>${entryBlock(vol)}</div>`:""}
+    ${skills.length?`<div class="cv-section"><h2>${t("secSkills")}</h2><div class="cv-tags">${skills.map(s=>`<span>• ${esc(s)}</span>`).join("")}</div></div>`:""}
+    ${langs.length?`<div class="cv-section"><h2>${t("secLang")}</h2><div class="cv-tags">${langs.map(s=>`<span>• ${esc(s)}</span>`).join("")}</div></div>`:""}
+    ${certs.length?`<div class="cv-section"><h2>${t("secCerts")}</h2><ul class="cv-list">${certs.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`:""}
+  `;
+  analyzeATS();
+  saveState();
+}
+
+// ===== ATS Analyzer =====
+function analyzeATS(){
+  const has = (v) => v && v.toString().trim().length;
+  const checks = [
+    {ok:has(state.fullName)&&has(state.title), w:10, ar:["الاسم والمسمى موجودان","أضف الاسم والمسمى الوظيفي"], en:["Name & title present","Add your name and job title"]},
+    {ok:has(state.email)&&has(state.phone), w:15, ar:["معلومات التواصل مكتملة","أضف البريد والهاتف"], en:["Contact info complete","Add email and phone"]},
+    {ok:has(state.summary)&&state.summary.length>=60, w:15, ar:["يوجد ملخص مهني واضح","اكتب ملخصاً مهنياً (60 حرفاً+)"], en:["Clear summary present","Write a summary (60+ chars)"]},
+    {ok:state.experience.some(e=>has(e.role)&&has(e.desc)), w:25, ar:["الخبرات موصوفة بإنجازات","أضف خبرة مع وصف للإنجازات"], en:["Experience well described","Add experience with achievements"]},
+    {ok:state.education.some(e=>has(e.degree)), w:15, ar:["قسم التعليم مكتمل","أضف مؤهلك التعليمي"], en:["Education complete","Add your education"]},
+    {ok:splitList(state.skills).length>=5, w:15, ar:["عدد كافٍ من المهارات (٥+)","أضف ٥ مهارات على الأقل"], en:["Enough skills (5+)","Add at least 5 skills"]},
+    {ok:has(state.languages), w:5, ar:["اللغات مذكورة","أضف اللغات"], en:["Languages listed","Add languages"]}
+  ];
+  const total = checks.reduce((a,c)=>a+c.w,0);
+  const score = Math.round(checks.reduce((a,c)=>a+(c.ok?c.w:0),0)/total*100);
+  $("#atsScore").textContent = score+"%";
+  $("#atsScore").style.color = score>=80?"#059669":score>=50?"#d97706":"#dc2626";
+  const bar = $("#atsBar");
+  bar.style.width = score+"%";
+  bar.style.background = score>=80?"#059669":score>=50?"#d97706":"#dc2626";
+  $("#atsTips").innerHTML = checks.map(c=>{
+    const msg = c[LANG][c.ok?0:1];
+    return `<li class="${c.ok?'text-emerald-600':'text-gray-500 dark:text-gray-400'}">${c.ok?'✓':'○'} ${msg}</li>`;
+  }).join("");
+}
+
+// ===== Billing UI =====
+function updateBillingUI(){
+  const el = $("#freeCounter");
+  if(isPro){ el.textContent = t("proActive"); el.className="mt-3 text-xs font-semibold text-emerald-600"; }
+  else {
+    const left = Math.max(0, FREE_LIMIT - downloads);
+    el.textContent = I18N[LANG].freeLeft(left);
+    el.className = left>0 ? "mt-3 text-xs font-semibold text-emerald-600" : "mt-3 text-xs font-semibold text-red-600";
+  }
+}
+
+// ===== Persistence (local + cloud) =====
+const KEY = "seerati_state";
+function snapshot(){ return {ar: appData.ar, en: appData.en, enDirty, downloads, isPro, LANG}; }
+function saveState(){
+  try{ localStorage.setItem(KEY, JSON.stringify(snapshot())); }catch(e){}
+  // Push to the cloud too, if the auth layer is loaded and a user is signed in.
+  // window.seeratiCloudSave is defined in auth.js and is debounced there.
+  if(window.seeratiCloudSave) window.seeratiCloudSave(snapshot());
+}
+function loadState(){
+  try{
+    const raw = localStorage.getItem(KEY);
+    if(raw){
+      const d = JSON.parse(raw);
+      if(d.ar || d.en){
+        if(d.ar) appData.ar = d.ar;
+        if(d.en) appData.en = d.en;
+        enDirty = d.enDirty !== undefined ? d.enDirty : true;
+      } else if(d.state){
+        appData.ar = d.state; enDirty = true;
+      }
+      downloads = d.downloads||0; isPro = !!d.isPro; LANG = d.LANG||"ar";
+    }
+  }catch(e){}
+  state = (LANG === "en" && appData.en) ? appData.en : (LANG = "ar", appData.ar);
+}
+
+// ===== Hooks for the auth/cloud layer (auth.js) =====
+// auth.js calls these to load a signed-in user's saved resume into the app,
+// or to read the current data so it can upload it.
+window.seeratiApplyData = function(d){
+  if(!d) return;
+  if(d.ar) appData.ar = d.ar;
+  appData.en = d.en || null;
+  enDirty = d.enDirty !== undefined ? d.enDirty : true;
+  downloads = d.downloads || 0;
+  isPro = !!d.isPro;
+  LANG = (d.LANG === "en" && appData.en) ? "en" : "ar";
+  state = (LANG === "en" && appData.en) ? appData.en : appData.ar;
+  applyLang(); syncSimpleInputs(); renderAllRepeats(); renderCV(); updateBillingUI();
+};
+window.seeratiCurrentData = function(){ return snapshot(); };
+window.seeratiSetPro = function(v){ isPro = !!v; saveState(); updateBillingUI(); renderCV(); };
+
+// ===== Language =====
+function applyLang(){
+  document.documentElement.lang = LANG;
+  document.documentElement.dir = LANG==="ar" ? "rtl" : "ltr";
+  $("#cv").dir = LANG==="ar" ? "rtl" : "ltr";
+  $("#cv").classList.toggle("ltr", LANG!=="ar");
+  $("#langToggle").textContent = LANG==="ar" ? "EN" : "ع";
+  $("#retranslateBtn").classList.toggle("hidden", LANG!=="en");
+  document.body.style.fontFamily = LANG==="ar"
+    ? "'Tajawal','Cairo',sans-serif" : "'Inter',sans-serif";
+  document.querySelectorAll("[data-i18n]").forEach(el=>{
+    const k = el.dataset.i18n;
+    const v = I18N[LANG][k];
+    if(typeof v === "string") el.textContent = v;
+  });
+}
+
+// ===== Events =====
+document.addEventListener("input",(e)=>{
+  const tgt=e.target;
+  if(tgt.dataset.bind){ state[tgt.dataset.bind]=tgt.value; if(LANG==="ar") enDirty = true; renderCV(); }
+  if(tgt.dataset.rep){ state[tgt.dataset.rep][+tgt.dataset.idx][tgt.dataset.key]=tgt.value; if(LANG==="ar") enDirty = true; renderCV(); }
+});
+document.addEventListener("click",(e)=>{
+  const tgt=e.target;
+  if(tgt.dataset.add){
+    const s=tgt.dataset.add;
+    const blank = Object.fromEntries(repeatSchema[s].map(f=>[f.k,""]));
+    appData.ar[s].push({...blank});
+    if(appData.en) appData.en[s].push({...blank});
+    renderRepeat(s); renderCV();
+  }
+  if(tgt.dataset.remove){
+    const s=tgt.dataset.remove; const idx=+tgt.dataset.idx;
+    appData.ar[s].splice(idx,1);
+    if(appData.en) appData.en[s].splice(idx,1);
+    renderRepeat(s); renderCV();
+  }
+});
+$("#templateSelect").addEventListener("change",(e)=>{ $("#cv").dataset.template=e.target.value; });
+
+$("#langToggle").addEventListener("click", async ()=>{
+  if(LANG === "ar"){
+    LANG = "en";
+    applyLang();
+    if(!appData.en || enDirty){ await regenerateEnglish(); }
+    state = appData.en;
+  } else {
+    LANG = "ar";
+    state = appData.ar;
+  }
+  applyLang(); syncSimpleInputs(); renderAllRepeats(); renderCV(); updateBillingUI();
+});
+
+$("#retranslateBtn").addEventListener("click", async ()=>{
+  if(LANG !== "en") return;
+  await regenerateEnglish();
+  state = appData.en;
+  syncSimpleInputs(); renderAllRepeats(); renderCV(); updateBillingUI();
+});
+
+// Download with free-attempt gating
+$("#downloadBtn").addEventListener("click",()=>{
+  if(!isPro && downloads >= FREE_LIMIT){
+    $("#paywall").classList.remove("hidden");
+    $("#paywall").classList.add("flex");
+    return;
+  }
+  if(!isPro) downloads++;
+  saveState(); updateBillingUI(); renderCV();
+  setTimeout(()=>window.print(), 100);
+});
+$("#upgradeBtn").addEventListener("click",()=>{
+  isPro = true; saveState(); updateBillingUI(); renderCV();
+  $("#paywall").classList.add("hidden"); $("#paywall").classList.remove("flex");
+  setTimeout(()=>window.print(), 150);
+});
+$("#closePaywall").addEventListener("click",()=>{
+  $("#paywall").classList.add("hidden"); $("#paywall").classList.remove("flex");
+});
+
+// ===== Bind helpers =====
+function syncSimpleInputs(){
+  document.querySelectorAll("[data-bind]").forEach(el=>{
+    const k=el.dataset.bind; if(state[k]!==undefined) el.value=state[k];
+  });
+}
+
+// ===== Init =====
+loadState();
+applyLang();
+syncSimpleInputs();
+renderAllRepeats();
+renderCV();
+updateBillingUI();

@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>سيرتي | SEERATI — ATS Resume Builder</title>
+  <script
+    src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4.3.0/dist/index.global.js"
+    integrity="sha384-nWTzRTCY/9V4Bo352ehygr1c4cnst4XN6lMR3fipakEQrhVpc0hEM5Dii3Amz0sT"
+    crossorigin="anonymous"
+  ></script>
+  <style type="text/tailwindcss">
+    @custom-variant dark (&:where(.dark, .dark *));
+  </style>
+  <script>
+    document.documentElement.classList.toggle(
+      'dark',
+      window.matchMedia('(prefers-color-scheme: dark)').matches
+    );
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&family=Tajawal:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles.css">
+  <!-- Supabase client (accounts + cloud database) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body class="min-h-dvh text-sm antialiased bg-gray-100 dark:bg-gray-950 text-gray-900 dark:text-gray-100">
+
+  <!-- Header -->
+  <header class="no-print sticky top-0 z-20 bg-white dark:bg-gray-900 border-b border-gray-200 dark:border-gray-800 shadow-sm">
+    <div class="max-w-7xl mx-auto px-4 py-3 flex items-center justify-between gap-3 flex-wrap">
+      <div class="flex items-center gap-2.5">
+        <img src="icon.jpeg" alt="Seerati" class="w-10 h-10 rounded-xl object-cover shadow-sm">
+        <div>
+          <h1 class="font-bold text-base leading-tight">سيرتي <span class="text-emerald-600">| SEERATI</span></h1>
+          <p class="text-xs text-gray-500 dark:text-gray-400" data-i18n="tagline">سيرتك الذاتية… بمعايير عالمية</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-wrap">
+        <span id="cloudBadge" class="text-xs font-semibold"></span>
+        <button id="accountBtn" class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold">👤</button>
+        <button id="langToggle" class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold">EN</button>
+        <button id="retranslateBtn" class="hidden rounded-lg border border-emerald-500 bg-white dark:bg-gray-800 px-3 py-2 text-sm font-semibold text-emerald-600" title="إعادة الترجمة من العربي / Re-translate from Arabic">🔄</button>
+        <select id="templateSelect" class="rounded-lg border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-800 px-3 py-2 text-sm">
+          <option value="classic" data-i18n="tplClassic">قالب كلاسيكي</option>
+          <option value="modern" data-i18n="tplModern">قالب عصري</option>
+          <option value="minimal" data-i18n="tplMinimal">قالب بسيط</option>
+        </select>
+        <button id="downloadBtn" class="rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold px-4 py-2 text-sm flex items-center gap-2">
+          <span>⬇️</span> <span data-i18n="download">تحميل PDF</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6 grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+    <!-- ===== FORM ===== -->
+    <section class="no-print space-y-5">
+
+      <!-- ATS Analyzer -->
+      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+        <div class="flex items-center justify-between mb-1">
+          <h2 class="font-bold text-base flex items-center gap-2">📊 <span data-i18n="atsTitle">تحليل توافق ATS</span></h2>
+          <span id="atsScore" class="text-lg font-bold">--</span>
+        </div>
+        <div class="w-full h-2.5 rounded-full bg-gray-200 dark:bg-gray-800 overflow-hidden">
+          <div id="atsBar" class="h-full bg-emerald-500 transition-all" style="width:0%"></div>
+        </div>
+        <ul id="atsTips" class="mt-3 space-y-1 text-xs"></ul>
+        <p id="freeCounter" class="mt-3 text-xs font-semibold text-emerald-600"></p>
+      </div>
+
+      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+        <h2 class="font-bold text-base mb-4 flex items-center gap-2">👤 <span data-i18n="personalInfo">المعلومات الشخصية</span></h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <label class="block"><span class="text-xs text-gray-500" data-i18n="fullName">الاسم الكامل</span>
+            <input data-bind="fullName" class="field"></label>
+          <label class="block"><span class="text-xs text-gray-500" data-i18n="jobTitle">المسمى الوظيفي</span>
+            <input data-bind="title" class="field"></label>
+          <label class="block"><span class="text-xs text-gray-500" data-i18n="email">البريد الإلكتروني</span>
+            <input data-bind="email" class="field"></label>
+          <label class="block"><span class="text-xs text-gray-500" data-i18n="phone">رقم الهاتف</span>
+            <input data-bind="phone" class="field"></label>
+          <label class="block"><span class="text-xs text-gray-500" data-i18n="location">المدينة / الدولة</span>
+            <input data-bind="location" class="field"></label>
+          <label class="block"><span class="text-xs text-gray-500" data-i18n="link">رابط (LinkedIn / موقع)</span>
+            <input data-bind="link" class="field"></label>
+        </div>
+        <label class="block mt-3"><span class="text-xs text-gray-500" data-i18n="summary">نبذة مختصرة (الملخص المهني)</span>
+          <textarea data-bind="summary" rows="3" class="field"></textarea></label>
+      </div>
+
+      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-bold text-base flex items-center gap-2">💼 <span data-i18n="experience">الخبرات العملية</span></h2>
+          <button data-add="experience" class="add-btn" data-i18n="add">+ إضافة</button>
+        </div>
+        <div id="experienceList" class="space-y-3"></div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-bold text-base flex items-center gap-2">🎓 <span data-i18n="education">التعليم</span></h2>
+          <button data-add="education" class="add-btn" data-i18n="add">+ إضافة</button>
+        </div>
+        <div id="educationList" class="space-y-3"></div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-bold text-base flex items-center gap-2">🚀 <span data-i18n="projects">المشاريع</span></h2>
+          <button data-add="projects" class="add-btn" data-i18n="add">+ إضافة</button>
+        </div>
+        <div id="projectsList" class="space-y-3"></div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h2 class="font-bold text-base flex items-center gap-2">🤝 <span data-i18n="volunteer">العمل التطوعي</span></h2>
+          <button data-add="volunteer" class="add-btn" data-i18n="add">+ إضافة</button>
+        </div>
+        <div id="volunteerList" class="space-y-3"></div>
+      </div>
+
+      <div class="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-5">
+        <h2 class="font-bold text-base mb-3 flex items-center gap-2">🛠️ <span data-i18n="skills">المهارات</span></h2>
+        <label class="block"><span class="text-xs text-gray-500" data-i18n="skillsHint">افصل بين المهارات بفاصلة</span>
+          <textarea data-bind="skills" rows="2" class="field"></textarea></label>
+        <h2 class="font-bold text-base mt-4 mb-3 flex items-center gap-2">🌐 <span data-i18n="languages">اللغات</span></h2>
+        <label class="block"><span class="text-xs text-gray-500" data-i18n="langHint">افصل بين اللغات بفاصلة</span>
+          <input data-bind="languages" class="field"></label>
+        <h2 class="font-bold text-base mt-4 mb-3 flex items-center gap-2">📜 <span data-i18n="certs">الشهادات</span></h2>
+        <label class="block"><span class="text-xs text-gray-500" data-i18n="certsHint">شهادة في كل سطر</span>
+          <textarea data-bind="certs" rows="2" class="field"></textarea></label>
+      </div>
+    </section>
+
+    <!-- ===== PREVIEW ===== -->
+    <section class="lg:sticky lg:top-20 self-start">
+      <p class="no-print text-xs text-gray-500 mb-2 text-center" data-i18n="previewNote">معاينة حيّة — هذا ما سيظهر في ملف PDF</p>
+      <div class="preview-wrap" style="position:relative;">
+        <div id="translateOverlay" class="hidden absolute inset-0 z-30 bg-white/85 dark:bg-gray-950/85 flex flex-col items-center justify-center gap-2 text-sm font-semibold text-emerald-700 dark:text-emerald-400 rounded-xl">
+          <span class="text-2xl">🌐</span>
+          <span>جارٍ الترجمة إلى الإنجليزية… / Translating to English…</span>
+        </div>
+        <div id="cv" class="cv-page" data-template="classic"></div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="no-print text-center text-xs text-gray-400 py-6">سيرتي | SEERATI — MVP</footer>
+
+  <!-- ===== Auth Modal ===== -->
+  <div id="authModal" class="no-print fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-sm w-full p-6 shadow-2xl">
+      <div class="text-center">
+        <div class="text-4xl mb-2">🔑</div>
+        <h3 class="font-bold text-lg" data-i18n="authTitle">الدخول إلى سيرتي</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" data-i18n="authSub">سجّل الدخول لحفظ سيرتك على كل أجهزتك</p>
+      </div>
+      <div class="mt-5 space-y-3">
+        <input id="authEmail" type="email" class="field" data-i18n-ph="emailPlaceholder" placeholder="البريد الإلكتروني" autocomplete="email">
+        <input id="authPass" type="password" class="field" data-i18n-ph="pwPlaceholder" placeholder="كلمة المرور" autocomplete="current-password">
+        <p id="authStatus" class="text-xs min-h-4"></p>
+        <button id="authSubmit" class="w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5">تسجيل الدخول</button>
+        <button id="authSwitch" class="w-full text-sm text-emerald-600 hover:underline">ما عندك حساب؟ أنشئ واحد</button>
+        <button id="authClose" class="w-full text-sm text-gray-500 hover:underline" data-i18n="authClose">إغلاق</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== Paywall Modal ===== -->
+  <div id="paywall" class="no-print fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <div class="text-center">
+        <div class="text-4xl mb-2">🔒</div>
+        <h3 class="font-bold text-lg" data-i18n="pwTitle">انتهت محاولاتك المجانية</h3>
+        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" data-i18n="pwSub">اشترك للتحميل بلا حدود وبدون علامة مائية</p>
+      </div>
+      <div class="mt-5 space-y-3">
+        <div class="border border-emerald-500 rounded-xl p-4 relative">
+          <span class="absolute -top-2.5 right-4 bg-emerald-600 text-white text-[10px] px-2 py-0.5 rounded-full" data-i18n="pwBest">الأفضل</span>
+          <div class="flex justify-between items-center">
+            <span class="font-semibold" data-i18n="pwPro">بريميوم</span>
+            <span class="font-bold text-emerald-600">19 <span data-i18n="pwMonth">ر.س/شهر</span></span>
+          </div>
+          <p class="text-xs text-gray-500 mt-1" data-i18n="pwProFeat">كل القوالب • بدون علامة مائية • تحليل ATS متقدم</p>
+        </div>
+        <div class="border border-gray-200 dark:border-gray-700 rounded-xl p-4">
+          <div class="flex justify-between items-center">
+            <span class="font-semibold" data-i18n="pwLife">مدى الحياة</span>
+            <span class="font-bold">79 <span data-i18n="pwOnce">ر.س مرة واحدة</span></span>
+          </div>
+          <p class="text-xs text-gray-500 mt-1" data-i18n="pwLifeFeat">كل المزايا للأبد — دفعة واحدة</p>
+        </div>
+      </div>
+      <button id="upgradeBtn" class="w-full mt-5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5" data-i18n="pwUpgrade">ترقية الآن (تجريبي)</button>
+      <button id="closePaywall" class="w-full mt-2 text-sm text-gray-500 hover:underline" data-i18n="pwClose">ربما لاحقاً</button>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>

@@ -109,7 +109,7 @@ async function handleSubmit(){
   const email = A("#authEmail").value.trim();
   const pass  = A("#authPass").value;
   const dict = I18N[(typeof LANG!=="undefined")?LANG:"ar"];
-  if(!email || !pass){ setStatus("✱", "#dc2626"); return; }
+  if(!email || !pass){ setStatus(dict.authFillBoth, "#dc2626"); return; }
   setStatus("…", "#6b7280");
   try{
     if(authMode === "signup"){

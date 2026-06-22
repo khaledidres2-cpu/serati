@@ -12,6 +12,7 @@ const I18N = {
     add:"+ إضافة", remove:"حذف ✕", previewNote:"معاينة حيّة — هذا ما سيظهر في ملف PDF",
     secSummary:"الملخص المهني", secExp:"الخبرات العملية", secEdu:"التعليم", secProj:"المشاريع",
     secVol:"العمل التطوعي", secSkills:"المهارات", secLang:"اللغات", secCerts:"الشهادات",
+    customSections:"أقسام إضافية",
     pwTitle:"انتهت محاولاتك المجانية", pwSub:"اشترك للتحميل بلا حدود وبدون علامة مائية",
     pwBest:"الأفضل", pwPro:"بريميوم", pwMonth:"ر.س/شهر", pwProFeat:"كل القوالب • بدون علامة مائية • تحليل ATS متقدم",
     pwLife:"مدى الحياة", pwOnce:"ر.س مرة واحدة", pwLifeFeat:"كل المزايا للأبد — دفعة واحدة",
@@ -30,7 +31,8 @@ const I18N = {
       experience:{role:"المسمى الوظيفي",org:"الجهة / الشركة",date:"المدة",desc:"الوصف (سطر لكل إنجاز)"},
       education:{degree:"الدرجة / التخصص",org:"المؤسسة التعليمية",date:"المدة",desc:"تفاصيل (اختياري)"},
       projects:{name:"اسم المشروع",link:"رابط (اختياري)",desc:"الوصف"},
-      volunteer:{role:"الدور",org:"الجهة",date:"المدة",desc:"الوصف"}
+      volunteer:{role:"الدور",org:"الجهة",date:"المدة",desc:"الوصف"},
+      custom:{title:"العنوان",details:"التفاصيل (اختياري)"}
     }
   },
   en: {
@@ -45,6 +47,7 @@ const I18N = {
     add:"+ Add", remove:"Remove ✕", previewNote:"Live preview — this is your PDF",
     secSummary:"Professional Summary", secExp:"Work Experience", secEdu:"Education", secProj:"Projects",
     secVol:"Volunteering", secSkills:"Skills", secLang:"Languages", secCerts:"Certifications",
+    customSections:"Additional Sections",
     pwTitle:"Free downloads used up", pwSub:"Subscribe for unlimited, watermark-free downloads",
     pwBest:"Best", pwPro:"Premium", pwMonth:"/mo", pwProFeat:"All templates • No watermark • Advanced ATS",
     pwLife:"Lifetime", pwOnce:"one-time", pwLifeFeat:"All features forever — one payment",
@@ -63,7 +66,8 @@ const I18N = {
       experience:{role:"Job Title",org:"Company",date:"Duration",desc:"Description (one line per achievement)"},
       education:{degree:"Degree / Major",org:"Institution",date:"Duration",desc:"Details (optional)"},
       projects:{name:"Project Name",link:"Link (optional)",desc:"Description"},
-      volunteer:{role:"Role",org:"Organization",date:"Duration",desc:"Description"}
+      volunteer:{role:"Role",org:"Organization",date:"Duration",desc:"Description"},
+      custom:{title:"Title",details:"Details (optional)"}
     }
   }
 };
@@ -80,7 +84,7 @@ const DEFAULT_STATE = {
   certs:"AWS Certified Developer - أمازون - 2023",
   experience:[{role:"مهندس برمجيات أول",org:"شركة التقنية",date:"2021 - الآن",desc:"قيادة فريق من 4 مطورين.\nتحسين أداء النظام بنسبة 40%.\nتطوير واجهات برمجية (APIs) جديدة."}],
   education:[{degree:"بكالوريوس علوم الحاسب",org:"جامعة الإمارات",date:"2015 - 2019",desc:""}],
-  projects:[], volunteer:[]
+  projects:[], volunteer:[], custom:[]
 };
 const appData = {
   ar: JSON.parse(JSON.stringify(DEFAULT_STATE)),
@@ -153,6 +157,9 @@ async function buildTranslatedState(ar){
     role: await translateText(item.role), org: await translateText(item.org),
     date: await translateText(item.date), desc: await translateLines(item.desc)
   })));
+  en.custom = await Promise.all(ar.custom.map(async item => ({
+    title: await translateText(item.title), details: await translateLines(item.details)
+  })));
   return en;
 }
 function showTranslateOverlay(show){
@@ -172,12 +179,13 @@ async function regenerateEnglish(){
 }
 
 // ===== Repeatable sections =====
-const repeatOrder = ["experience","education","projects","volunteer"];
+const repeatOrder = ["experience","education","projects","volunteer","custom"];
 const repeatSchema = {
   experience:[{k:"role"},{k:"org"},{k:"date"},{k:"desc",area:true}],
   education:[{k:"degree"},{k:"org"},{k:"date"},{k:"desc",area:true}],
   projects:[{k:"name"},{k:"link"},{k:"desc",area:true}],
-  volunteer:[{k:"role"},{k:"org"},{k:"date"},{k:"desc",area:true}]
+  volunteer:[{k:"role"},{k:"org"},{k:"date"},{k:"desc",area:true}],
+  custom:[{k:"title"},{k:"details",area:true}]
 };
 
 function renderRepeat(section){
@@ -224,6 +232,8 @@ function renderCV(){
   const proj= state.projects.filter(e=>e.name).map(e=>({t1:e.name,date:"",sub:e.link,desc:e.desc}));
   const vol = state.volunteer.filter(e=>e.role||e.org).map(e=>({t1:e.role,date:e.date,sub:e.org,desc:e.desc}));
 
+  const customs = state.custom.filter(c=>c.title||c.details);
+
   const wm = (!isPro && downloads >= FREE_LIMIT)
     ? `<div class="watermark">سيرتي | SEERATI</div>` : "";
 
@@ -242,6 +252,7 @@ function renderCV(){
     ${skills.length?`<div class="cv-section"><h2>${t("secSkills")}</h2><div class="cv-tags">${skills.map(s=>`<span>• ${esc(s)}</span>`).join("")}</div></div>`:""}
     ${langs.length?`<div class="cv-section"><h2>${t("secLang")}</h2><div class="cv-tags">${langs.map(s=>`<span>• ${esc(s)}</span>`).join("")}</div></div>`:""}
     ${certs.length?`<div class="cv-section"><h2>${t("secCerts")}</h2><ul class="cv-list">${certs.map(c=>`<li>${esc(c)}</li>`).join("")}</ul></div>`:""}
+    ${customs.map(c=>`<div class="cv-section"><h2>${esc(c.title)}</h2>${c.details?`<div class="desc">${esc(c.details)}</div>`:""}</div>`).join("")}
   `;
   analyzeATS();
   saveState();
@@ -307,6 +318,8 @@ function loadState(){
       downloads = d.downloads||0; isPro = !!d.isPro; LANG = d.LANG||"ar";
     }
   }catch(e){}
+  if(!appData.ar.custom) appData.ar.custom = [];
+  if(appData.en && !appData.en.custom) appData.en.custom = [];
   state = (LANG === "en" && appData.en) ? appData.en : (LANG = "ar", appData.ar);
 }
 
@@ -317,6 +330,8 @@ window.seeratiApplyData = function(d){
   if(!d) return;
   if(d.ar) appData.ar = d.ar;
   appData.en = d.en || null;
+  if(!appData.ar.custom) appData.ar.custom = [];
+  if(appData.en && !appData.en.custom) appData.en.custom = [];
   enDirty = d.enDirty !== undefined ? d.enDirty : true;
   downloads = d.downloads || 0;
   isPro = !!d.isPro;

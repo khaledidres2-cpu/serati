@@ -1,24 +1,15 @@
 // =====================================================================
 //  auth.js — Accounts + cloud saving for Seerati, powered by Supabase
-// ---------------------------------------------------------------------
-//  HOW TO CONFIGURE (do this once after creating your Supabase project):
-//  1. Go to your Supabase project → Settings → API.
-//  2. Copy the "Project URL" and the "anon public" key.
-//  3. Paste them into SUPABASE_URL and SUPABASE_ANON_KEY below.
-//
-//  The anon key is SAFE to put in this frontend file — it is designed to
-//  be public. Security is enforced by Row Level Security in the database
-//  (see the SQL in the setup guide). NEVER put the "service_role" key here.
 // =====================================================================
-const SUPABASE_URL = "PUT_YOUR_SUPABASE_URL_HERE";
-const SUPABASE_ANON_KEY = "PUT_YOUR_SUPABASE_ANON_KEY_HERE";
+const SUPABASE_URL = "https://jdxvyayrwxldfvifmhbo.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpkeHZ5YXlyd3hsZGZ2aWZtaGJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODIxMjI1ODcsImV4cCI6MjA5NzY5ODU4N30.g6DnvRAtb7dpmozYqjVIiKOorhTmAyrUaDu5oPqNNlM";
 
 const CONFIGURED =
   SUPABASE_URL.startsWith("http") && SUPABASE_ANON_KEY.length > 20;
 
-let sb = null;            // Supabase client
-let currentUser = null;   // signed-in user (or null = guest)
-let authMode = "signin";  // "signin" | "signup"
+let sb = null;
+let currentUser = null;
+let authMode = "signin";
 
 // ---- small UI helpers ----
 const A = (s) => document.querySelector(s);
@@ -68,7 +59,6 @@ function refreshAccountUI(){
 }
 
 // ---- cloud read / write ----
-// Table "resumes": one row per user → { user_id (uuid, PK), data (jsonb), updated_at }
 async function cloudLoad(){
   if(!sb || !currentUser) return null;
   const { data, error } = await sb
@@ -93,8 +83,6 @@ async function cloudWrite(payload){
   else setCloudBadge(dict.savedCloud, "#059669");
 }
 
-// Exposed to app.js — called by saveState(). Debounced so typing doesn't spam
-// the database; we only write ~1.2s after the user stops editing.
 window.seeratiCloudSave = function(payload){
   if(!sb || !currentUser) return;
   clearTimeout(saveTimer);
@@ -105,9 +93,6 @@ window.seeratiCloudSave = function(payload){
 async function onSignedIn(user){
   currentUser = user;
   refreshAccountUI();
-  // First login on this device: if the cloud already has a resume, load it.
-  // Otherwise push whatever is currently on screen up to the cloud so the
-  // user keeps the work they did as a guest.
   const cloud = await cloudLoad();
   if(cloud){
     window.seeratiApplyData(cloud);
@@ -130,7 +115,6 @@ async function handleSubmit(){
     if(authMode === "signup"){
       const { data, error } = await sb.auth.signUp({ email, password: pass });
       if(error){ setStatus(error.message, "#dc2626"); return; }
-      // If email confirmation is ON, there is no session yet.
       if(!data.session){ setStatus(dict.checkEmail, "#059669"); return; }
       await onSignedIn(data.user);
       closeAuthModal();
@@ -149,14 +133,9 @@ async function handleSubmit(){
 function wireAuthUI(){
   A("#accountBtn").addEventListener("click", async ()=>{
     if(currentUser){
-      // signed in → this button signs out
       if(sb) await sb.auth.signOut();
       onSignedOut();
     } else {
-      if(!CONFIGURED){
-        alert("⚠️ لم يتم إعداد الحسابات بعد. ضع مفاتيح Supabase في ملف auth.js.\n\nAccounts not configured yet — add your Supabase keys in auth.js.");
-        return;
-      }
       openAuthModal();
     }
   });
@@ -166,7 +145,6 @@ function wireAuthUI(){
     renderAuthMode(); setStatus("");
   });
   A("#authClose").addEventListener("click", closeAuthModal);
-  // Pressing Enter inside the password field submits
   A("#authPass").addEventListener("keydown", (e)=>{ if(e.key==="Enter") handleSubmit(); });
 }
 
@@ -174,12 +152,11 @@ function wireAuthUI(){
 (async function initAuth(){
   wireAuthUI();
   if(!CONFIGURED){
-    refreshAccountUI(); // app still works as a local-only guest tool
+    refreshAccountUI();
     return;
   }
   sb = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-  // Restore an existing session (so the user stays logged in across refreshes)
   const { data } = await sb.auth.getSession();
   if(data && data.session){
     await onSignedIn(data.session.user);
@@ -187,7 +164,6 @@ function wireAuthUI(){
     refreshAccountUI();
   }
 
-  // React to future sign-in / sign-out events
   sb.auth.onAuthStateChange((event, session)=>{
     if(event === "SIGNED_OUT") onSignedOut();
   });

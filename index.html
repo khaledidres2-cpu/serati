@@ -225,22 +225,34 @@
 
   <!-- ===== Auth Modal ===== -->
   <div id="authModal" class="no-print fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">
-    <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-sm w-full p-6 shadow-2xl">
-      <div class="text-center">
-        <div class="text-4xl mb-2">🔑</div>
-        <h3 class="font-bold text-lg" data-i18n="authTitle">الدخول إلى سيرتي</h3>
-        <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" data-i18n="authSub">سجّل الدخول لحفظ سيرتك على كل أجهزتك</p>
+    <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-sm w-full shadow-2xl overflow-hidden">
+      <div class="text-center px-6 pt-7 pb-5 text-white" style="background:linear-gradient(135deg,#065f46,#059669);">
+        <div class="text-4xl mb-1">🔑</div>
+        <h3 class="font-extrabold text-xl" data-i18n="authTitle">الدخول إلى سيرتي</h3>
+        <p class="text-sm text-emerald-50/90 mt-1" data-i18n="authSub">سجّل الدخول لحفظ سيرتك على كل أجهزتك</p>
+        <p id="authReason" class="hidden text-sm font-semibold bg-white/15 rounded-lg px-3 py-2 mt-3"></p>
       </div>
-      <div class="mt-5 space-y-3">
+      <div class="p-6 space-y-3">
         <input id="authEmail" type="email" class="field" data-i18n-ph="emailPlaceholder" placeholder="البريد الإلكتروني" autocomplete="email">
         <input id="authPass" type="password" class="field" data-i18n-ph="pwPlaceholder" placeholder="كلمة المرور" autocomplete="current-password">
         <p id="authStatus" class="text-xs min-h-4"></p>
-        <button id="authSubmit" class="w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-semibold py-2.5">تسجيل الدخول</button>
-        <button id="authSwitch" class="w-full text-sm text-emerald-600 hover:underline">ما عندك حساب؟ أنشئ واحد</button>
+        <button id="authSubmit" class="w-full rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3 text-base">تسجيل الدخول</button>
+        <button id="authSwitch" class="w-full text-sm text-emerald-600 font-semibold hover:underline">ما عندك حساب؟ أنشئ واحد</button>
         <button id="authClose" class="w-full text-sm text-gray-500 hover:underline" data-i18n="authClose">إغلاق</button>
       </div>
     </div>
   </div>
+
+  <!-- Welcome-back toast after sign-in -->
+  <div id="welcomeBack" class="no-print fixed inset-0 z-[55] hidden items-center justify-center bg-black/50 p-4">
+    <div class="bg-white dark:bg-gray-900 rounded-2xl max-w-sm w-full p-7 shadow-2xl text-center">
+      <div class="text-5xl mb-2">🎉</div>
+      <h3 id="welcomeBackTitle" class="font-extrabold text-xl">أهلاً بعودتك!</h3>
+      <p class="text-sm text-gray-500 dark:text-gray-400 mt-1" data-i18n="wbSub">سيرتك محفوظة وجاهزة. تابع من حيث توقفت.</p>
+      <button id="welcomeBackBtn" class="w-full mt-5 rounded-lg bg-emerald-600 hover:bg-emerald-700 text-white font-bold py-3" data-i18n="wbBtn">الدخول للموقع ←</button>
+    </div>
+  </div>
+
 
   <!-- ===== Paywall Modal ===== -->
   <div id="paywall" class="no-print fixed inset-0 z-50 hidden items-center justify-center bg-black/60 p-4">

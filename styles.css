@@ -22,6 +22,8 @@ body { font-family: 'Tajawal', 'Cairo', system-ui, sans-serif; }
   border-radius: 8px; padding: 4px 10px;
 }
 .add-btn:hover { background:#059669; color:#fff; }
+.mic-btn.mic-on { background:#dc2626; color:#fff; border-color:#dc2626; animation:micpulse 1.2s ease-in-out infinite; }
+@keyframes micpulse { 0%,100%{opacity:1;} 50%{opacity:.55;} }
 .remove-btn { font-size:12px; color:#dc2626; }
 .remove-btn:hover { text-decoration: underline; }
 

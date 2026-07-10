@@ -25,7 +25,17 @@ function setCloudBadge(text, color){
   el.textContent = text || "";
   el.style.color = color || "";
 }
-function openAuthModal(){
+function openAuthModal(reasonKey){
+  const reasonEl = A("#authReason");
+  if(reasonEl){
+    const lang = (typeof LANG !== "undefined") ? LANG : "ar";
+    if(reasonKey && I18N[lang][reasonKey]){
+      reasonEl.textContent = I18N[lang][reasonKey];
+      reasonEl.classList.remove("hidden");
+    } else {
+      reasonEl.classList.add("hidden");
+    }
+  }
   A("#authModal").classList.remove("hidden");
   A("#authModal").classList.add("flex");
   renderAuthMode();
@@ -35,6 +45,9 @@ function closeAuthModal(){
   A("#authModal").classList.remove("flex");
   setStatus("");
 }
+// Exposed so app.js (download gate) can open the login with a reason line.
+window.seeratiOpenAuth = openAuthModal;
+window.seeratiIsSignedIn = () => !!currentUser;
 function renderAuthMode(){
   const lang = (typeof LANG !== "undefined") ? LANG : "ar";
   const dict = I18N[lang];
@@ -90,7 +103,17 @@ window.seeratiCloudSave = function(payload){
 };
 
 // ---- session lifecycle ----
-async function onSignedIn(user){
+function showWelcomeBack(isNew){
+  const dict = I18N[(typeof LANG!=="undefined")?LANG:"ar"];
+  const name = currentUser && currentUser.email ? currentUser.email.split("@")[0] : "";
+  const titleEl = A("#welcomeBackTitle");
+  const subEl = A("#welcomeBack") && A("#welcomeBack").querySelector("[data-i18n='wbSub']");
+  if(titleEl) titleEl.textContent = isNew ? dict.wbNew : dict.wbTitle(name);
+  if(subEl) subEl.textContent = isNew ? dict.wbNewSub : dict.wbSub;
+  const m = A("#welcomeBack");
+  if(m){ m.classList.remove("hidden"); m.classList.add("flex"); }
+}
+async function onSignedIn(user, opts){
   currentUser = user;
   refreshAccountUI();
   const cloud = await cloudLoad();
@@ -99,6 +122,7 @@ async function onSignedIn(user){
   } else {
     await cloudWrite(window.seeratiCurrentData());
   }
+  if(opts && opts.interactive) showWelcomeBack(!!opts.isNew);
 }
 function onSignedOut(){
   currentUser = null;
@@ -116,12 +140,12 @@ async function handleSubmit(){
       const { data, error } = await sb.auth.signUp({ email, password: pass });
       if(error){ setStatus(error.message, "#dc2626"); return; }
       if(!data.session){ setStatus(dict.checkEmail, "#059669"); return; }
-      await onSignedIn(data.user);
+      await onSignedIn(data.user, { interactive:true, isNew:true });
       closeAuthModal();
     } else {
       const { data, error } = await sb.auth.signInWithPassword({ email, password: pass });
       if(error){ setStatus(error.message, "#dc2626"); return; }
-      await onSignedIn(data.user);
+      await onSignedIn(data.user, { interactive:true, isNew:false });
       closeAuthModal();
     }
   }catch(err){
@@ -146,6 +170,11 @@ function wireAuthUI(){
   });
   A("#authClose").addEventListener("click", closeAuthModal);
   A("#authPass").addEventListener("keydown", (e)=>{ if(e.key==="Enter") handleSubmit(); });
+  const wbBtn = A("#welcomeBackBtn");
+  if(wbBtn) wbBtn.addEventListener("click", ()=>{
+    const m = A("#welcomeBack");
+    if(m){ m.classList.add("hidden"); m.classList.remove("flex"); }
+  });
 }
 
 // ---- init ----

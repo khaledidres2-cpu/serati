@@ -2,6 +2,11 @@
 const I18N = {
   ar: {
     tagline:"سيرتك الذاتية… بمعايير عالمية", download:"تحميل PDF",
+    wTitle:"أهلاً بك في سيرتي", wSub:"اصنع سيرتك الذاتية باحترافية ومعايير عالمية — بالعربي والإنجليزي، بضغطة زر.",
+    wF1:"مطابقة مع الوظيفة", wF1d:"اعرف توافق سيرتك مع أي إعلان وظيفة",
+    wF2:"صياغة ذكية", wF2d:"حوّل كلامك العادي لصياغة احترافية",
+    wF3:"تحدّث بدل الكتابة", wF3d:"سجّل خبراتك صوتيًا وسيرتي يكتبها",
+    wStart:"ابدأ الآن", wFree:"مجاني للبدء — بدون بطاقة بنكية",
     tplClassic:"كلاسيكي", tplModern:"عصري", tplMinimal:"بسيط",
     tplExecutive:"تنفيذي", tplElegant:"أنيق", tplBold:"جريء", tplProfessional:"احترافي", tplCompact:"مدمج",
     atsTitle:"تحليل توافق ATS", personalInfo:"المعلومات الشخصية",
@@ -55,6 +60,11 @@ const I18N = {
   },
   en: {
     tagline:"Your resume, to global standards", download:"Download PDF",
+    wTitle:"Welcome to Seerati", wSub:"Build a professional, world-class resume — in Arabic and English, in one click.",
+    wF1:"Job Matching", wF1d:"See how well your resume fits any job ad",
+    wF2:"Smart Wording", wF2d:"Turn plain text into professional phrasing",
+    wF3:"Speak, don't type", wF3d:"Dictate your experience and Seerati writes it",
+    wStart:"Get Started", wFree:"Free to start — no credit card",
     tplClassic:"Classic", tplModern:"Modern", tplMinimal:"Minimal",
     tplExecutive:"Executive", tplElegant:"Elegant", tplBold:"Bold", tplProfessional:"Professional", tplCompact:"Compact",
     atsTitle:"ATS Compatibility", personalInfo:"Personal Information",
@@ -680,3 +690,18 @@ syncSimpleInputs();
 renderAllRepeats();
 renderCV();
 updateBillingUI();
+
+// ===== Welcome screen =====
+(function initWelcome(){
+  const w = $("#welcome");
+  if(!w) return;
+  let seen = false;
+  try{ seen = localStorage.getItem("seerati_welcomed") === "1"; }catch(e){}
+  if(seen){ w.remove(); return; }
+  $("#welcomeStart").addEventListener("click", ()=>{
+    try{ localStorage.setItem("seerati_welcomed","1"); }catch(e){}
+    w.style.transition = "opacity .35s ease";
+    w.style.opacity = "0";
+    setTimeout(()=> w.remove(), 360);
+  });
+})();

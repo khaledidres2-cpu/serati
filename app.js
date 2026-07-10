@@ -22,6 +22,10 @@ const I18N = {
     matchNoText:"الصق نص الوظيفة أولاً",
     matchNoKeywords:"لم أستطع استخراج كلمات كافية من النص، حاول تلصق نصًا أطول",
     matchAllGood:"✓ ما شاء الله — كل الكلمات المهمة موجودة في سيرتك",
+    enhance:"✨ حسّن الصياغة",
+    enhancing:"…جارٍ التحسين",
+    enhanceEmpty:"اكتب شيئًا أولاً لكي أحسّن صياغته",
+    enhanceFallback:"(صياغة محلية — خدمة الذكاء الاصطناعي غير متاحة الآن)",
     pwTitle:"انتهت محاولاتك المجانية", pwSub:"اشترك للتحميل بلا حدود وبدون علامة مائية",
     pwBest:"الأفضل", pwPro:"بريميوم", pwMonth:"ر.س/شهر", pwProFeat:"كل القوالب • بدون علامة مائية • تحليل ATS متقدم",
     pwLife:"مدى الحياة", pwOnce:"ر.س مرة واحدة", pwLifeFeat:"كل المزايا للأبد — دفعة واحدة",
@@ -66,6 +70,10 @@ const I18N = {
     matchNoText:"Paste the job text first",
     matchNoKeywords:"Couldn't extract enough keywords — try pasting more text",
     matchAllGood:"✓ Great — all important keywords are already in your resume",
+    enhance:"✨ Improve wording",
+    enhancing:"…Improving",
+    enhanceEmpty:"Write something first so I can improve it",
+    enhanceFallback:"(local phrasing — AI service unavailable right now)",
     pwTitle:"Free downloads used up", pwSub:"Subscribe for unlimited, watermark-free downloads",
     pwBest:"Best", pwPro:"Premium", pwMonth:"/mo", pwProFeat:"All templates • No watermark • Advanced ATS",
     pwLife:"Lifetime", pwOnce:"one-time", pwLifeFeat:"All features forever — one payment",
@@ -260,6 +268,56 @@ function runJobMatch(){
 }
 
 
+// ===== Smart wording enhancement (Gemini via Supabase, with local fallback) =====
+const ENHANCE_ENDPOINT = "https://jdxvyayrwxldfvifmhbo.supabase.co/functions/v1/enhance-cv";
+
+const ACTION_VERBS_AR = ["قُدت","طوّرت","أنجزت","حسّنت","نفّذت","أدرت","بنيت","صمّمت","أطلقت","ساهمت في"];
+const ACTION_VERBS_EN = ["Led","Developed","Delivered","Improved","Implemented","Managed","Built","Designed","Launched","Contributed to"];
+function localEnhance(text, lang){
+  const verbs = lang === "ar" ? ACTION_VERBS_AR : ACTION_VERBS_EN;
+  const startsWithVerb = (line) => verbs.some(v => line.trim().startsWith(v));
+  return (text||"").split(/\n+/).map(l=>l.trim()).filter(Boolean).map((line,i)=>{
+    if(startsWithVerb(line)) return line;
+    const verb = verbs[i % verbs.length];
+    return lang === "ar" ? `${verb} ${line}` : `${verb} ${line.charAt(0).toLowerCase()}${line.slice(1)}`;
+  }).join("\n");
+}
+
+async function enhanceText(text, kind){
+  const clean = (text||"").trim();
+  if(!clean) return null;
+  try{
+    const res = await fetch(ENHANCE_ENDPOINT, {
+      method:"POST",
+      headers:{ "Content-Type":"application/json" },
+      body: JSON.stringify({ text: clean, lang: LANG, kind })
+    });
+    if(res.ok){
+      const data = await res.json();
+      if(data.result) return { text: data.result, ai: true };
+    }
+  }catch(err){ /* network / not deployed → fall through to local */ }
+  return { text: localEnhance(clean, LANG), ai: false };
+}
+
+async function handleEnhanceClick(btn, targetTextarea, kind, onDone){
+  const dict = I18N[LANG];
+  const original = targetTextarea.value;
+  if(!original.trim()){ alert(dict.enhanceEmpty); return; }
+  btn.disabled = true;
+  const label = btn.textContent;
+  btn.textContent = dict.enhancing;
+  const out = await enhanceText(original, kind);
+  btn.disabled = false;
+  btn.textContent = label;
+  if(out && out.text){
+    targetTextarea.value = out.text;
+    if(onDone) onDone(out.text);
+    if(!out.ai) btn.title = dict.enhanceFallback;
+  }
+}
+
+
 const repeatOrder = ["experience","education","projects","volunteer","custom"];
 const repeatSchema = {
   experience:[{k:"role"},{k:"org"},{k:"date"},{k:"desc",area:true}],
@@ -279,10 +337,14 @@ function renderRepeat(section){
     const fieldsHtml = repeatSchema[section].map(f => {
       const val = esc(item[f.k]||"");
       const lbl = labels[f.k];
-      const input = f.area
-        ? `<textarea rows="3" data-rep="${section}" data-idx="${i}" data-key="${f.k}" class="field">${val}</textarea>`
-        : `<input data-rep="${section}" data-idx="${i}" data-key="${f.k}" class="field" value="${val}">`;
-      return `<label class="block"><span class="text-xs text-gray-500">${lbl}</span>${input}</label>`;
+      if(f.area){
+        return `<label class="block"><span class="text-xs text-gray-500">${lbl}</span>`
+          + `<textarea rows="3" data-rep="${section}" data-idx="${i}" data-key="${f.k}" class="field">${val}</textarea>`
+          + `<button type="button" class="add-btn mt-1" data-enhance="${section}" data-idx="${i}" data-key="${f.k}">${t("enhance")}</button>`
+          + `</label>`;
+      }
+      return `<label class="block"><span class="text-xs text-gray-500">${lbl}</span>`
+        + `<input data-rep="${section}" data-idx="${i}" data-key="${f.k}" class="field" value="${val}"></label>`;
     }).join("");
     card.innerHTML = `<div class="flex justify-between items-center">
         <span class="text-xs font-semibold text-gray-400">#${i+1}</span>
@@ -466,9 +528,26 @@ document.addEventListener("click",(e)=>{
     if(appData.en) appData.en[s].splice(idx,1);
     renderRepeat(s); renderCV();
   }
+  if(tgt.dataset.enhance){
+    const s=tgt.dataset.enhance; const idx=+tgt.dataset.idx; const key=tgt.dataset.key;
+    const ta = tgt.closest("label").querySelector("textarea");
+    handleEnhanceClick(tgt, ta, s, (newText)=>{
+      state[s][idx][key] = newText;
+      if(LANG==="ar") enDirty = true;
+      renderCV();
+    });
+  }
 });
 $("#templateSelect").addEventListener("change",(e)=>{ $("#cv").dataset.template=e.target.value; });
 $("#matchBtn").addEventListener("click", runJobMatch);
+$("#enhanceSummary").addEventListener("click", (e)=>{
+  const ta = document.querySelector('[data-bind="summary"]');
+  handleEnhanceClick(e.target, ta, "summary", (newText)=>{
+    state.summary = newText;
+    if(LANG==="ar") enDirty = true;
+    renderCV();
+  });
+});
 
 $("#langToggle").addEventListener("click", async ()=>{
   if(LANG === "ar"){

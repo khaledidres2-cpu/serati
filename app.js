@@ -49,6 +49,9 @@ const I18N = {
     authClose:"إغلاق", savedCloud:"✓ محفوظ في حسابك", savingCloud:"…جارٍ الحفظ",
     guestNote:"تعمل كزائر — سجّل الدخول لحفظ بياناتك",
     checkEmail:"تم الإرسال — راجع بريدك لتأكيد الحساب ثم سجّل الدخول",
+    wbTitle:(name)=>`أهلاً بعودتك${name?"، "+name:""}!`, wbSub:"سيرتك محفوظة وجاهزة. تابع من حيث توقفت.", wbBtn:"الدخول للموقع ←",
+    wbNew:"تم إنشاء حسابك بنجاح 🎉", wbNewSub:"سيرتك الآن محفوظة تلقائيًا على كل أجهزتك.",
+    authReasonDownload:"⬇️ سجّل الدخول أو أنشئ حسابًا مجانيًا لتحميل سيرتك",
     authFillBoth:"يرجى كتابة البريد الإلكتروني وكلمة المرور (٦ أحرف على الأقل)",
     fields:{
       experience:{role:"المسمى الوظيفي",org:"الجهة / الشركة",date:"المدة",desc:"الوصف (سطر لكل إنجاز)"},
@@ -107,6 +110,9 @@ const I18N = {
     authClose:"Close", savedCloud:"✓ Saved to your account", savingCloud:"…Saving",
     guestNote:"Working as guest — sign in to save your data",
     checkEmail:"Sent — check your email to confirm, then sign in",
+    wbTitle:(name)=>`Welcome back${name?", "+name:""}!`, wbSub:"Your resume is saved and ready. Pick up where you left off.", wbBtn:"Enter the site →",
+    wbNew:"Account created successfully 🎉", wbNewSub:"Your resume is now saved automatically across all your devices.",
+    authReasonDownload:"⬇️ Sign in or create a free account to download your resume",
     authFillBoth:"Please enter your email and password (6+ characters)",
     fields:{
       experience:{role:"Job Title",org:"Company",date:"Duration",desc:"Description (one line per achievement)"},
@@ -658,6 +664,12 @@ $("#retranslateBtn").addEventListener("click", async ()=>{
 
 // Download with free-attempt gating
 $("#downloadBtn").addEventListener("click",()=>{
+  // Value gate: the user has now built their resume and wants it — best moment
+  // to ask them to create a free account (highest conversion). Guests are sent
+  // to sign up first; their work is already saved locally and syncs on sign-in.
+  if(window.seeratiIsSignedIn && !window.seeratiIsSignedIn()){
+    if(window.seeratiOpenAuth){ window.seeratiOpenAuth("authReasonDownload"); return; }
+  }
   if(!isPro && downloads >= FREE_LIMIT){
     $("#paywall").classList.remove("hidden");
     $("#paywall").classList.add("flex");

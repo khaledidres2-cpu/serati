@@ -102,6 +102,55 @@ body { font-family: 'Tajawal', 'Cairo', system-ui, sans-serif; }
 .cv-page[data-template="minimal"] .cv-entry .sub { color:#444; }
 .cv-page[data-template="minimal"] .cv-entry .date { background:none; padding:0; }
 
+/* ===== Template: executive (deep navy, serif headings) ===== */
+.cv-page[data-template="executive"] { font-family:'Cairo','Tajawal',Georgia,serif; }
+.cv-page[data-template="executive"] h1 { color:#1e293b; letter-spacing:0; }
+.cv-page[data-template="executive"] .cv-title { color:#334155; }
+.cv-page[data-template="executive"] .cv-header { border-bottom:3px double #1e293b; padding-bottom:12px; }
+.cv-page[data-template="executive"] .cv-section h2 { color:#1e293b; border-bottom:1px solid #cbd5e1; letter-spacing:2px; }
+.cv-page[data-template="executive"] .cv-entry .sub { color:#475569; }
+.cv-page[data-template="executive"] .cv-tags span { background:#f1f5f9; color:#1e293b; }
+.cv-page[data-template="executive"] .cv-entry .date { background:#1e293b; color:#fff; }
+
+/* ===== Template: elegant (warm burgundy accents, refined) ===== */
+.cv-page[data-template="elegant"] h1 { color:#7c2d3a; font-weight:600; }
+.cv-page[data-template="elegant"] .cv-title { color:#a1566a; font-style:italic; }
+.cv-page[data-template="elegant"] .cv-header { border-bottom:1px solid #d4a5b0; padding-bottom:12px; }
+.cv-page[data-template="elegant"] .cv-section h2 { color:#7c2d3a; border-bottom:1px solid #e8cdd4; font-weight:600; letter-spacing:1.5px; }
+.cv-page[data-template="elegant"] .cv-entry .sub { color:#a1566a; }
+.cv-page[data-template="elegant"] .cv-tags span { background:#fdf2f4; color:#7c2d3a; }
+.cv-page[data-template="elegant"] .cv-entry .date { background:#fdf2f4; color:#7c2d3a; }
+
+/* ===== Template: bold (strong color band header) ===== */
+.cv-page[data-template="bold"] .cv-header { background:#059669; margin:-50px -54px 22px; padding:38px 54px 26px; }
+.cv-page[data-template="bold"] h1 { color:#fff; font-size:30px; }
+.cv-page[data-template="bold"] .cv-title { color:#d1fae5; }
+.cv-page[data-template="bold"] .cv-contact { color:#ecfdf5; }
+.cv-page[data-template="bold"] .cv-section h2 { color:#059669; border-bottom:2px solid #059669; }
+.cv-page[data-template="bold"] .cv-entry .sub { color:#059669; font-weight:700; }
+.cv-page[data-template="bold"] .cv-tags span { background:#059669; color:#fff; }
+.cv-page[data-template="bold"] .cv-entry .date { background:#d1fae5; color:#065f46; }
+
+/* ===== Template: professional (slate blue, clean corporate) ===== */
+.cv-page[data-template="professional"] h1 { color:#1d4ed8; }
+.cv-page[data-template="professional"] .cv-title { color:#3b82f6; }
+.cv-page[data-template="professional"] .cv-header { border-bottom:2px solid #1d4ed8; padding-bottom:10px; }
+.cv-page[data-template="professional"] .cv-section h2 { color:#1d4ed8; background:#eff6ff; padding:5px 10px; border-radius:5px; letter-spacing:.5px; }
+.cv-page[data-template="professional"] .cv-entry .sub { color:#3b82f6; }
+.cv-page[data-template="professional"] .cv-tags span { background:#eff6ff; color:#1d4ed8; }
+.cv-page[data-template="professional"] .cv-entry .date { background:#eff6ff; color:#1d4ed8; }
+
+/* ===== Template: compact (tight spacing, fits more on one page) ===== */
+.cv-page[data-template="compact"] { font-size:12.5px; line-height:1.55; padding:38px 44px; }
+.cv-page[data-template="compact"] h1 { font-size:23px; }
+.cv-page[data-template="compact"] .cv-title { font-size:14px; }
+.cv-page[data-template="compact"] .cv-section { margin-top:14px; }
+.cv-page[data-template="compact"] .cv-section h2 { font-size:12.5px; margin-bottom:6px; padding-bottom:3px; border-bottom:1px solid #333; color:#111; letter-spacing:.5px; }
+.cv-page[data-template="compact"] .cv-entry { margin-bottom:9px; }
+.cv-page[data-template="compact"] .cv-header { border-bottom:1.5px solid #333; padding-bottom:8px; }
+.cv-page[data-template="compact"] .cv-entry .sub { color:#444; }
+.cv-page[data-template="compact"] .cv-entry .date { background:#f3f4f6; }
+
 /* ===== PRINT (PDF) ===== */
 @media print {
   @page { size:A4; margin:14mm; }
@@ -113,4 +162,9 @@ body { font-family: 'Tajawal', 'Cairo', system-ui, sans-serif; }
   .cv-section { break-inside:avoid; }
   .cv-entry { break-inside:avoid; }
   .watermark { -webkit-print-color-adjust:exact; print-color-adjust:exact; }
+  .cv-page[data-template="bold"] .cv-header,
+  .cv-page[data-template="professional"] .cv-section h2,
+  .cv-tags span, .cv-entry .date {
+    -webkit-print-color-adjust:exact; print-color-adjust:exact;
+  }
 }

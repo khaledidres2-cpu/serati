@@ -2,7 +2,8 @@
 const I18N = {
   ar: {
     tagline:"سيرتك الذاتية… بمعايير عالمية", download:"تحميل PDF",
-    tplClassic:"قالب كلاسيكي", tplModern:"قالب عصري", tplMinimal:"قالب بسيط",
+    tplClassic:"كلاسيكي", tplModern:"عصري", tplMinimal:"بسيط",
+    tplExecutive:"تنفيذي", tplElegant:"أنيق", tplBold:"جريء", tplProfessional:"احترافي", tplCompact:"مدمج",
     atsTitle:"تحليل توافق ATS", personalInfo:"المعلومات الشخصية",
     fullName:"الاسم الكامل", jobTitle:"المسمى الوظيفي", email:"البريد الإلكتروني",
     phone:"رقم الهاتف", location:"المدينة / الدولة", link:"رابط (LinkedIn / موقع)",
@@ -50,7 +51,8 @@ const I18N = {
   },
   en: {
     tagline:"Your resume, to global standards", download:"Download PDF",
-    tplClassic:"Classic template", tplModern:"Modern template", tplMinimal:"Minimal template",
+    tplClassic:"Classic", tplModern:"Modern", tplMinimal:"Minimal",
+    tplExecutive:"Executive", tplElegant:"Elegant", tplBold:"Bold", tplProfessional:"Professional", tplCompact:"Compact",
     atsTitle:"ATS Compatibility", personalInfo:"Personal Information",
     fullName:"Full Name", jobTitle:"Job Title", email:"Email",
     phone:"Phone", location:"City / Country", link:"Link (LinkedIn / website)",

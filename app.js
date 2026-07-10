@@ -27,6 +27,10 @@ const I18N = {
     enhancing:"…جارٍ التحسين",
     enhanceEmpty:"اكتب شيئًا أولاً لكي أحسّن صياغته",
     enhanceFallback:"(صياغة محلية — خدمة الذكاء الاصطناعي غير متاحة الآن)",
+    mic:"🎤 تحدّث",
+    micListening:"⏺ يسمع… تحدّث الآن",
+    micDenied:"لم يُسمح بالوصول للميكروفون. فعّله من إعدادات المتصفح.",
+    micError:"تعذّر التعرف على الصوت، حاول مرة أخرى",
     pwTitle:"انتهت محاولاتك المجانية", pwSub:"اشترك للتحميل بلا حدود وبدون علامة مائية",
     pwBest:"الأفضل", pwPro:"بريميوم", pwMonth:"ر.س/شهر", pwProFeat:"كل القوالب • بدون علامة مائية • تحليل ATS متقدم",
     pwLife:"مدى الحياة", pwOnce:"ر.س مرة واحدة", pwLifeFeat:"كل المزايا للأبد — دفعة واحدة",
@@ -76,6 +80,10 @@ const I18N = {
     enhancing:"…Improving",
     enhanceEmpty:"Write something first so I can improve it",
     enhanceFallback:"(local phrasing — AI service unavailable right now)",
+    mic:"🎤 Speak",
+    micListening:"⏺ Listening… speak now",
+    micDenied:"Microphone access denied. Enable it in your browser settings.",
+    micError:"Couldn't recognize speech, please try again",
     pwTitle:"Free downloads used up", pwSub:"Subscribe for unlimited, watermark-free downloads",
     pwBest:"Best", pwPro:"Premium", pwMonth:"/mo", pwProFeat:"All templates • No watermark • Advanced ATS",
     pwLife:"Lifetime", pwOnce:"one-time", pwLifeFeat:"All features forever — one payment",
@@ -302,6 +310,47 @@ async function enhanceText(text, kind){
   return { text: localEnhance(clean, LANG), ai: false };
 }
 
+// ===== Speech-to-text dictation (browser Web Speech API) =====
+const SpeechRec = window.SpeechRecognition || window.webkitSpeechRecognition;
+const MIC_SUPPORTED = !!SpeechRec;
+let activeMic = null;
+
+function startDictation(btn, targetTextarea, onDone){
+  const dict = I18N[LANG];
+  if(activeMic){ try{ activeMic.stop(); }catch(e){} activeMic = null; return; }
+
+  const rec = new SpeechRec();
+  rec.lang = LANG === "ar" ? "ar-SA" : "en-US";
+  rec.interimResults = true;
+  rec.continuous = true;
+
+  const baseText = targetTextarea.value ? targetTextarea.value.trim() + " " : "";
+  let finalChunk = "";
+  const label = btn.textContent;
+
+  rec.onstart = () => { btn.textContent = dict.micListening; btn.classList.add("mic-on"); };
+  rec.onerror = (e) => {
+    if(e.error === "not-allowed" || e.error === "service-not-allowed") alert(dict.micDenied);
+    else if(e.error !== "aborted" && e.error !== "no-speech") alert(dict.micError);
+  };
+  rec.onend = () => {
+    btn.textContent = label; btn.classList.remove("mic-on"); activeMic = null;
+  };
+  rec.onresult = (event) => {
+    let interim = "";
+    for(let i = event.resultIndex; i < event.results.length; i++){
+      const tr = event.results[i][0].transcript;
+      if(event.results[i].isFinal) finalChunk += tr + " ";
+      else interim += tr;
+    }
+    targetTextarea.value = baseText + finalChunk + interim;
+    if(onDone) onDone(targetTextarea.value);
+  };
+
+  activeMic = rec;
+  try{ rec.start(); }catch(e){ activeMic = null; }
+}
+
 async function handleEnhanceClick(btn, targetTextarea, kind, onDone){
   const dict = I18N[LANG];
   const original = targetTextarea.value;
@@ -340,10 +389,15 @@ function renderRepeat(section){
       const val = esc(item[f.k]||"");
       const lbl = labels[f.k];
       if(f.area){
+        const micBtn = MIC_SUPPORTED
+          ? `<button type="button" class="add-btn mt-1 mic-btn" data-mic="${section}" data-idx="${i}" data-key="${f.k}">${t("mic")}</button>`
+          : "";
         return `<label class="block"><span class="text-xs text-gray-500">${lbl}</span>`
           + `<textarea rows="3" data-rep="${section}" data-idx="${i}" data-key="${f.k}" class="field">${val}</textarea>`
+          + `<div class="flex gap-2 flex-wrap">`
           + `<button type="button" class="add-btn mt-1" data-enhance="${section}" data-idx="${i}" data-key="${f.k}">${t("enhance")}</button>`
-          + `</label>`;
+          + micBtn
+          + `</div></label>`;
       }
       return `<label class="block"><span class="text-xs text-gray-500">${lbl}</span>`
         + `<input data-rep="${section}" data-idx="${i}" data-key="${f.k}" class="field" value="${val}"></label>`;
@@ -539,6 +593,15 @@ document.addEventListener("click",(e)=>{
       renderCV();
     });
   }
+  if(tgt.dataset.mic){
+    const s=tgt.dataset.mic; const idx=+tgt.dataset.idx; const key=tgt.dataset.key;
+    const ta = tgt.closest("label").querySelector("textarea");
+    startDictation(tgt, ta, (newText)=>{
+      state[s][idx][key] = newText;
+      if(LANG==="ar") enDirty = true;
+      renderCV();
+    });
+  }
 });
 $("#templateSelect").addEventListener("change",(e)=>{ $("#cv").dataset.template=e.target.value; });
 $("#matchBtn").addEventListener("click", runJobMatch);
@@ -550,6 +613,18 @@ $("#enhanceSummary").addEventListener("click", (e)=>{
     renderCV();
   });
 });
+if(MIC_SUPPORTED){
+  $("#micSummary").addEventListener("click", (e)=>{
+    const ta = document.querySelector('[data-bind="summary"]');
+    startDictation(e.target, ta, (newText)=>{
+      state.summary = newText;
+      if(LANG==="ar") enDirty = true;
+      renderCV();
+    });
+  });
+} else {
+  $("#micSummary").classList.add("hidden");
+}
 
 $("#langToggle").addEventListener("click", async ()=>{
   if(LANG === "ar"){
